@@ -1,0 +1,3 @@
+Siada views
+
+<?=$data['name'];?>
