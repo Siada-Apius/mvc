@@ -1,11 +1,15 @@
 <?php
 
+use Facebook\Facebook;
+use Facebook\FacebookRequest;
+
 class Home extends Controller
 {
     public function index($name = '')
     {
         $user = $this->medol('User');
         $user->name = $name;
+
 
         $this->view('home/index', ['name' => $user->name]);
     }

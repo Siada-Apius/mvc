@@ -21,6 +21,8 @@ class App
 
         $this->controller = new $this->controller;
 
+
+
         //check if method
         if (isset($url[1])) {
 
