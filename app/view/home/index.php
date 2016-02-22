@@ -13,15 +13,6 @@
 <div class="container">
     <nav class="navbar navbar-default">
         <div class="container-fluid">
-            <?php
-
-                echo '<pre>';
-                print_r($_SESSION);
-                echo '</pre>';
-
-            ?>
-
-
             <div class="navbar-left">
                 <ul class="nav navbar-nav">
                     <li><a href="/">Home</a></li>
@@ -29,8 +20,8 @@
             </div>
             <div class="navbar-right">
                 <ul class="nav navbar-nav">
-                    <?php if (empty($_SESSION['fb_access_token'])): ?><li><a href="auth/login">Login</a></li><?php endif; ?>
-                    <?php if ( ! empty($_SESSION['fb_access_token'])): ?><li><a href="auth/logout">Logout</a></li><?php endif; ?>
+                    <?php if (empty($_SESSION['AUTH'])): ?><li><a href="/auth/login">Login</a></li><?php endif; ?>
+                    <?php if ( ! empty($_SESSION['AUTH'])): ?><li><a href="/auth/logout">Logout</a></li><?php endif; ?>
                 </ul>
             </div>
         </div>
@@ -47,7 +38,6 @@
             <li><?php echo $_SESSION['FULLNAME']; ?></li>
             <li class="nav-header">Facebook Email</li>
             <li><?php echo $_SESSION['EMAIL']; ?></li>
-            <div><a href="/auth/logout">Logout</a></div>
         </ul>
     </div>
 
