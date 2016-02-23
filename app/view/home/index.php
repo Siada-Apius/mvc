@@ -34,9 +34,42 @@
             </div>
         </div>
     </nav>
-
-    <div class="container">
-
+    <div class="row">
+        <div class="col-md-3">
+            <div class="well">
+                <div class="panel-heading">
+                    <p>Friends <em>(<?=count($data['friends'])?>)</em></p>
+                </div>
+                <div class="panel-body">
+                    <ul class="list-unstyled">
+                        <?php foreach ($data['friends'] as $friend): ?>
+                            <li><?= $friend['name'] ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="">
+                <div class="panel-heading">
+                    <p class="h3">Posts <em>(<?=count($data['posts'])?>)</em></p>
+                </div>
+                <div class="panel-body">
+                    <?php foreach ($data['posts'] as $post): ?>
+                        <div class="row">
+                            <div class="thumbnail ">
+                                <?php echo isset($post['story']) ? '<p class="lead">'. $post['story'] .'</p>' : ''?>
+                                <?php echo isset($post['message']) ? '<p>'. $post['message'] .'</p>' : ''?>
+                                <div class="caption">
+                                    <span class="text-muted"><em><?php echo $post['id']?></em></span>
+                                    <p class="pull-right text-muted"><?php echo $post['created_time']->format('Y-m-d H:i')?></p>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
     </div>
 
 </div> <!-- /container -->

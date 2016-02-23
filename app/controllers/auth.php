@@ -37,7 +37,12 @@ class Auth extends Controller
 
         $helper = $fb->getRedirectLoginHelper();
 
-        $permissions = ['email', 'user_likes']; // optional
+        $permissions = [
+            'email',
+            'user_likes',
+            'user_friends',
+            'user_posts'
+        ]; // optional
         $loginUrl = $helper->getLoginUrl(FACE_CALLBACK_URL, $permissions);
 
         header("Location: " . $loginUrl);
