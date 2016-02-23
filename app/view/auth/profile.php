@@ -38,10 +38,8 @@
     <div class="container">
 
         <ul class="nav nav-list">
-            <?php if ($_SESSION['fb_auth']): ?>
             <li class="nav-header">Image</li>
             <li><img src="https://graph.facebook.com/<?php echo $_SESSION['auth_user']['id']; ?>/picture"></li>
-            <?php endif; ?>
             <li class="nav-header">Facebook ID</li>
             <li><?php echo  $_SESSION['auth_user']['id']; ?></li>
             <li class="nav-header">Facebook fullname</li>

@@ -1,17 +1,20 @@
 <?php
 
-use Facebook\Facebook;
-use Facebook\FacebookRequest;
 
 class Home extends Controller
 {
     public function index($name = '')
     {
+        if( ! $_SESSION['auth']) {
+            header("Location: /");
+        }
+
         $user = $this->medol('User');
         $user->name = $name;
 
 
-        $this->view('home/index', ['name' => $user->name]);
+
+        $this->view('home/index', ['session' => $_SESSION]);
     }
 
     public function create($name = '')

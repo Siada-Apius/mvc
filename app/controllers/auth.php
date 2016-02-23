@@ -1,91 +1,171 @@
 <?php
 
-use Facebook\FacebookRedirectLoginHelper;
-use Facebook\FacebookRequest;
-use Facebook\FacebookRequestException;
-use Facebook\FacebookSession;
-use Facebook\GraphUser;
-
-//use Facebook\Entities\AccessToken;
-//use Facebook\HttpClients\FacebookCurlHttpClient;
-//use Facebook\HttpClients\FacebookHttpable;
-
 class Auth extends Controller
 {
+    public function __construct()
+    {
+        if ($_SESSION['auth']) {
+            header("Location: ". HOME_URL);
+            exit();
+        }
+    }
+
+
+    public function index()
+    {
+        $this->view('auth/login');
+    }
+
     public function login()
     {
-//        print_r($_REQUEST);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        $this->view('auth/login');
+        if ($_POST) {
+            if (User::where(['email' => $_POST['email'], 'password' => md5($_POST['password'])])->exists()) {
+                $_SESSION['auth'] = true;
+                header("Location: " . HOME_URL);
+            } else {
+                header("Location: " . LOGIN_URL);
+            }
+        }
     }
 
     public function logout()
     {
         session_unset();
 
-        $_SESSION['FBID'] = NULL;
-        $_SESSION['FULLNAME'] = NULL;
-        $_SESSION['EMAIL'] =  NULL;
+        $_SESSION['auth'] = null;
+        $_SESSION['fb_auth'] = null;
+        $_SESSION['auth_user'] = null;
 
-        header("Location: /");
+        header("Location: " . LOGIN_URL);
     }
 
     public function face()
     {
-        FacebookSession::setDefaultApplication(
-            '166803343700868',
-            '49cf2bd6b9b304361f1b2455103723fd'
-        );
+        $fb = new Facebook\Facebook([
+            'app_id' => FB_APP_ID,
+            'app_secret' => FB_APP_SECRET,
+            'default_graph_version' => FB_DEFAULT_GRAPH_VERSION,
+        ]);
 
-        $helper = new FacebookRedirectLoginHelper( 'http://mvc.local/auth/face' );
+        $helper = $fb->getRedirectLoginHelper();
+
+        $permissions = ['email', 'user_likes']; // optional
+        $loginUrl = $helper->getLoginUrl(FACE_CALLBACK_URL, $permissions);
+
+        header("Location: " . $loginUrl);
+    }
+
+    public function face_callback()
+    {
+        $fb = new Facebook\Facebook([
+            'app_id' => FB_APP_ID,
+            'app_secret' => FB_APP_SECRET,
+            'default_graph_version' => FB_DEFAULT_GRAPH_VERSION,
+        ]);
+
+        $permissions = ['email'];
+
+        $helper = $fb->getRedirectLoginHelper();
 
         try {
-            $session = $helper->getSessionFromRedirect();
-        } catch(FacebookRequestException $ex) {
-            // When Facebook returns an error
-        } catch(\Exception $ex) {
-            // When validation fails or other local issues
+            $accessToken = $helper->getAccessToken();
+        } catch (Facebook\Exceptions\FacebookResponseException $e) {
+            echo 'Graph returned an error: ' . $e->getMessage();
+            exit;
+        } catch (Facebook\Exceptions\FacebookSDKException $e) {
+            echo 'Facebook SDK returned an error: ' . $e->getMessage();
+            exit;
         }
 
-        $loginUrl = $helper->getLoginUrl();
+        if (isset($accessToken)) {
+            if (isset($_SESSION['facebook_access_token'])) {
+                $fb->setDefaultAccessToken($_SESSION['facebook_access_token']);
+            } else {
+                $_SESSION['facebook_access_token'] = (string)$accessToken;
+                // OAuth 2.0 client handler
+                $oAuth2Client = $fb->getOAuth2Client();
+                // Exchanges a short-lived access token for a long-lived one
+                $longLivedAccessToken = $oAuth2Client->getLongLivedAccessToken($_SESSION['facebook_access_token']);
+                $_SESSION['facebook_access_token'] = (string)$longLivedAccessToken;
+                $fb->setDefaultAccessToken($_SESSION['facebook_access_token']);
+            }
+            // validating the access token
+            try {
+                $request = $fb->get('/me');
+            } catch (Facebook\Exceptions\FacebookResponseException $e) {
+                // When Graph returns an error
+                if ($e->getCode() == 190) {
+                    unset($_SESSION['facebook_access_token']);
+                    $helper = $fb->getRedirectLoginHelper();
+                    $loginUrl = $helper->getLoginUrl(LOGIN_URL, $permissions);
+                    header("Location: " . $loginUrl);
+                    exit;
+                }
+            } catch (Facebook\Exceptions\FacebookSDKException $e) {
+                // When validation fails or other local issues
+                echo 'Facebook SDK returned an error: ' . $e->getMessage();
+                exit;
+            }
 
-        if ( isset( $session ) ) {
-            // graph api request for user data
-            $request = new FacebookRequest( $session, 'GET', '/me' );
-            $response = $request->execute();
-            // get response
-            $graphObject = $response->getGraphObject();
-            $fbid = $graphObject->getProperty('id');              // To Get Facebook ID
-            $fbfullname = $graphObject->getProperty('name'); // To Get Facebook full name
-            $femail = $graphObject->getProperty('email');    // To Get Facebook email ID
+            // getting basic info about user
+            try {
+                $profile_request = $fb->get('/me?fields=name,first_name,last_name,email');
+                $profile = $profile_request->getGraphNode()->asArray();
+            } catch (Facebook\Exceptions\FacebookResponseException $e) {
+                // When Graph returns an error
+                echo 'Graph returned an error: ' . $e->getMessage();
+                unset($_SESSION['facebook_access_token']);
+                header("Location: " . LOGIN_URL);
+                exit;
+            } catch (Facebook\Exceptions\FacebookSDKException $e) {
+                // When validation fails or other local issues
+                echo 'Facebook SDK returned an error: ' . $e->getMessage();
+                exit;
+            }
 
+            $_SESSION['auth'] = true;
+            $_SESSION['fb_auth'] = true;
+            $_SESSION['auth_user'] = $profile;
 
-            /* ---- Session Variables -----*/
-            $_SESSION['AUTH'] = true;
-            $_SESSION['FBID'] = $fbid;
-            $_SESSION['FULLNAME'] = $fbfullname;
-            $_SESSION['EMAIL'] =  $femail;
-            /* ---- header location after session ----*/
-            header("Location: /");
+            header("Location: " . HOME_URL);
         } else {
-            $loginUrl = $helper->getLoginUrl(array('email'));
-            header("Location: ".$loginUrl);
+            $helper = $fb->getRedirectLoginHelper();
+            $loginUrl = $helper->getLoginUrl(LOGIN_URL, $permissions);
+            header("Location: " . $loginUrl);
+        }
+    }
+
+    public function profile()
+    {
+        $this->view('auth/profile');
+    }
+
+    public function signin()
+    {
+        if ($_POST) {
+            if (User::whereEmail($_POST['email'])->exists()) {
+                echo 'Email already exist!';
+                exit;
+            } else {
+                User::create([
+                    'name'      => htmlspecialchars($_POST['first_name'] .' '. $_POST['last_name']),
+                    'first_name' => htmlspecialchars($_POST['first_name']),
+                    'last_name' => htmlspecialchars($_POST['last_name']),
+                    'email'     => htmlspecialchars($_POST['email']),
+                    'password'  => htmlspecialchars(md5($_POST['password']))
+                ]);
+
+                $_SESSION['auth'] = true;
+                $_SESSION['fb_auth'] = false;
+                $_SESSION['auth_user']['first_name'] = $_POST['first_name'];
+                $_SESSION['auth_user']['last_name'] = $_POST['last_name'];
+                $_SESSION['auth_user']['name'] = $_POST['first_name'] .' '. $_POST['last_name'];
+                $_SESSION['auth_user']['email'] = $_POST['email'];
+
+                header("Location: " . HOME_URL);
+            }
         }
 
+        $this->view('auth/signin');
     }
 }
