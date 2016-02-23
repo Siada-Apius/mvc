@@ -4,9 +4,8 @@ class Auth extends Controller
 {
     public function __construct()
     {
-        if ($_SESSION['auth']) {
+        if (isset($_SESSION['auth'])) {
             header("Location: ". HOME_URL);
-            exit();
         }
     }
 
@@ -16,17 +15,6 @@ class Auth extends Controller
         $this->view('auth/login');
     }
 
-    public function login()
-    {
-        if ($_POST) {
-            if (User::where(['email' => $_POST['email'], 'password' => md5($_POST['password'])])->exists()) {
-                $_SESSION['auth'] = true;
-                header("Location: " . HOME_URL);
-            } else {
-                header("Location: " . LOGIN_URL);
-            }
-        }
-    }
 
     public function logout()
     {
@@ -127,45 +115,22 @@ class Auth extends Controller
             $_SESSION['fb_auth'] = true;
             $_SESSION['auth_user'] = $profile;
 
+            //check and create
+            if ( ! User::whereFacebookId($profile['facebook_id'])->exists()) {
+                User::create([
+                    'facebook_id' => $profile['id'],
+                    'fb_name'      => $profile['name'],
+                    'fb_first_name' => $profile['first_name'],
+                    'fb_last_name' => $profile['last_name'],
+                    'email' => $profile['email']
+                ]);
+            }
+
             header("Location: " . HOME_URL);
         } else {
             $helper = $fb->getRedirectLoginHelper();
             $loginUrl = $helper->getLoginUrl(LOGIN_URL, $permissions);
             header("Location: " . $loginUrl);
         }
-    }
-
-    public function profile()
-    {
-        $this->view('auth/profile');
-    }
-
-    public function signin()
-    {
-        if ($_POST) {
-            if (User::whereEmail($_POST['email'])->exists()) {
-                echo 'Email already exist!';
-                exit;
-            } else {
-                User::create([
-                    'name'      => htmlspecialchars($_POST['first_name'] .' '. $_POST['last_name']),
-                    'first_name' => htmlspecialchars($_POST['first_name']),
-                    'last_name' => htmlspecialchars($_POST['last_name']),
-                    'email'     => htmlspecialchars($_POST['email']),
-                    'password'  => htmlspecialchars(md5($_POST['password']))
-                ]);
-
-                $_SESSION['auth'] = true;
-                $_SESSION['fb_auth'] = false;
-                $_SESSION['auth_user']['first_name'] = $_POST['first_name'];
-                $_SESSION['auth_user']['last_name'] = $_POST['last_name'];
-                $_SESSION['auth_user']['name'] = $_POST['first_name'] .' '. $_POST['last_name'];
-                $_SESSION['auth_user']['email'] = $_POST['email'];
-
-                header("Location: " . HOME_URL);
-            }
-        }
-
-        $this->view('auth/signin');
     }
 }

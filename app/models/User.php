@@ -7,11 +7,11 @@ class User extends Model
 //    public $name;
 
     protected $fillable = [
-        'name',
-        'first_name',
-        'last_name',
+        'facebook_id',
+        'fb_name',
+        'fb_first_name',
+        'fb_last_name',
         'email',
-        'password',
         'created_at',
         'updated_at'
     ];

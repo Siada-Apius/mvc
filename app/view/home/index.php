@@ -25,7 +25,7 @@
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><?=$_SESSION['auth_user']['first_name']?> <span class="caret"></span></a>
 
                         <ul class="dropdown-menu" role="menu">
-                            <li><a href="/auth/profile"><i class="fa fa-user"></i> Profile</a></li>
+                            <li><a href="/home/profile"><i class="fa fa-user"></i> Profile</a></li>
                             <?php if ($_SESSION['auth']): ?><li><a href="/auth/logout"><i class="fa fa-sign-out"></i> Logout</a></li><?php endif; ?>
                         </ul>
                     </li>
@@ -37,18 +37,6 @@
 
     <div class="container">
 
-        <ul class="nav nav-list">
-            <?php if ($_SESSION['fb_auth']): ?>
-            <li class="nav-header">Image</li>
-            <li><img src="https://graph.facebook.com/<?php echo $_SESSION['auth_user']['id']; ?>/picture"></li>
-            <?php endif; ?>
-            <li class="nav-header">Facebook ID</li>
-            <li><?php echo  $_SESSION['auth_user']['id']; ?></li>
-            <li class="nav-header">Facebook fullname</li>
-            <li><?php echo $_SESSION['auth_user']['name']; ?></li>
-            <li class="nav-header">Facebook Email</li>
-            <li><?php echo $_SESSION['auth_user']['email']; ?></li>
-        </ul>
     </div>
 
 </div> <!-- /container -->

@@ -3,12 +3,15 @@
 
 class Home extends Controller
 {
-    public function index($name = '')
+    public function __construct()
     {
         if( ! $_SESSION['auth']) {
-            header("Location: /");
+            header("Location: ".LOGIN_URL);
         }
+    }
 
+    public function index($name = '')
+    {
         $user = $this->medol('User');
         $user->name = $name;
 
@@ -24,5 +27,13 @@ class Home extends Controller
                 'name' => $name
             ]);
         }
+    }
+
+
+    public function profile()
+    {
+        $user = User::whereFacebookId($_SESSION['auth_user']['id'])->first();
+
+        $this->view('home/profile', ['user' => $user]);
     }
 }

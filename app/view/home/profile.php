@@ -37,16 +37,37 @@
 
     <div class="container">
 
-        <ul class="nav nav-list">
-            <li class="nav-header">Image</li>
-            <li><img src="https://graph.facebook.com/<?php echo $_SESSION['auth_user']['id']; ?>/picture"></li>
-            <li class="nav-header">Facebook ID</li>
-            <li><?php echo  $_SESSION['auth_user']['id']; ?></li>
-            <li class="nav-header">Facebook fullname</li>
-            <li><?php echo $_SESSION['auth_user']['name']; ?></li>
-            <li class="nav-header">Facebook Email</li>
-            <li><?php echo $_SESSION['auth_user']['email']; ?></li>
-        </ul>
+        <?php if ($data['user']): ?>
+        <div class="col-xs-1">
+            <img src="https://graph.facebook.com/<?php echo $_SESSION['auth_user']['id']; ?>/picture">
+        </div>
+        <div class="col-xs-6">
+            <div class="panel panel-default">
+                <table class="table table-bordered table-striped">
+                    <tr>
+                        <td>facebook id</td>
+                        <td><?= $data['user']->facebook_id ?></td>
+                    </tr>
+                    <tr>
+                        <td>Name</td>
+                        <td><?= $data['user']->fb_name ?></td>
+                    </tr>
+                    <tr>
+                        <td>First name</td>
+                        <td><?= $data['user']->fb_first_name ?></td>
+                    </tr>
+                    <tr>
+                        <td>Last name</td>
+                        <td><?= $data['user']->fb_last_name ?></td>
+                    </tr>
+                    <tr>
+                        <td>email</td>
+                        <td><?= $data['user']->email ?></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
 
 </div> <!-- /container -->
