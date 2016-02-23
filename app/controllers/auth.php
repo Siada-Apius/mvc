@@ -41,7 +41,8 @@ class Auth extends Controller
             'email',
             'user_likes',
             'user_friends',
-            'user_posts'
+            'user_posts',
+            'publish_actions'
         ]; // optional
         $loginUrl = $helper->getLoginUrl(FACE_CALLBACK_URL, $permissions);
 

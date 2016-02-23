@@ -30,7 +30,6 @@
                         </ul>
                     </li>
                 </ul>
-
             </div>
         </div>
     </nav>
@@ -38,14 +37,22 @@
         <div class="col-md-3">
             <div class="well">
                 <div class="panel-heading">
-                    <p>Friends <em>(<?=count($data['friends'])?>)</em></p>
+                    <p>Friends <em>(<?php echo count($data['friends'])?>)</em></p>
                 </div>
                 <div class="panel-body">
+                    <?php if (is_null($data['friends'])): ?>
+                        <p class="text-warning"><?php echo $data['error']['error'] ; ?></p>
+
+                        <br><br>
+
+                        <p class="text-danger"><?php echo $data['error']['taggable_friends']['graph']; ?></p>
+                    <?php else: ?>
                     <ul class="list-unstyled">
                         <?php foreach ($data['friends'] as $friend): ?>
                             <li><?= $friend['name'] ?></li>
                         <?php endforeach; ?>
                     </ul>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -55,20 +62,40 @@
                     <p class="h3">Posts <em>(<?=count($data['posts'])?>)</em></p>
                 </div>
                 <div class="panel-body">
-                    <?php foreach ($data['posts'] as $post): ?>
-                        <div class="row">
-                            <div class="thumbnail ">
-                                <?php echo isset($post['story']) ? '<p class="lead">'. $post['story'] .'</p>' : ''?>
-                                <?php echo isset($post['message']) ? '<p>'. $post['message'] .'</p>' : ''?>
-                                <div class="caption">
-                                    <span class="text-muted"><em><?php echo $post['id']?></em></span>
-                                    <p class="pull-right text-muted"><?php echo $post['created_time']->format('Y-m-d H:i')?></p>
+                    <?php if (is_null($data['posts'])): ?>
+                        <p class="text-warning"><?php echo $data['error']['error'] ; ?></p>
+
+                        <br><br>
+
+                        <p class="text-danger"><?php echo $data['error']['posts']['graph']; ?></p>
+                    <?php else: ?>
+                        <?php foreach ($data['posts'] as $post): ?>
+                            <div class="row">
+                                <div class="thumbnail ">
+                                    <?php echo isset($post['story']) ? '<p class="lead">'. $post['story'] .'</p>' : ''?>
+                                    <?php echo isset($post['message']) ? '<p>'. $post['message'] .'</p>' : ''?>
+                                    <div class="caption">
+                                        <span class="text-muted"><em><?php echo $post['id']?></em></span>
+                                        <p class="pull-right text-muted"><?php echo $post['created_time']->format('Y-m-d H:i')?></p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    <?php endforeach; ?>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
             </div>
+        </div>
+        <div class="col-md-3">
+            <form action="" method="post">
+                <fieldset>
+                    <legend>Make post</legend>
+                </fieldset>
+                <div class="form-group">
+                    <textarea class="form-control" rows="3" name="message"></textarea>
+                </div>
+                <input type="submit" value="Post" name="submit" class="btn btn-success btn-block">
+
+            </form>
         </div>
     </div>
 
